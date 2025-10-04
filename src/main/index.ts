@@ -6,6 +6,7 @@ import icon from '../../resources/icon.png?asset'
 
 let tray: Tray | null = null
 let popupWindow: BrowserWindow | null = null
+let viewerWindow: BrowserWindow | null = null
 let timer: NodeJS.Timeout | null = null
 let isPaused = false
 const TIMER_INTERVAL = 25 * 60 * 1000 // 25 minutes in milliseconds
@@ -28,8 +29,38 @@ async function appendLogEntry(action: string): Promise<void> {
   
   try {
     await fs.appendFile(logFilePath, logLine, 'utf-8')
+    // Notify viewer window if it's open
+    if (viewerWindow && !viewerWindow.isDestroyed()) {
+      viewerWindow.webContents.send('logs-updated')
+    }
   } catch (error) {
     console.error('Failed to write log entry:', error)
+  }
+}
+
+// Read all log entries
+async function readLogEntries(): Promise<Array<{ timestamp: string; action: string }>> {
+  const logFilePath = getLogFilePath()
+  
+  try {
+    await fs.access(logFilePath)
+    const content = await fs.readFile(logFilePath, 'utf-8')
+    const lines = content.trim().split('\n').filter(line => line.length > 0)
+    const logs = lines.map(line => {
+      try {
+        return JSON.parse(line)
+      } catch {
+        return null
+      }
+    }).filter(log => log !== null)
+    
+    // Sort by timestamp descending (newest first)
+    return logs.sort((a, b) => {
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    })
+  } catch (error) {
+    // File doesn't exist yet
+    return []
   }
 }
 
@@ -81,6 +112,48 @@ function createPopupWindow(): void {
     popupWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/popup.html')
   } else {
     popupWindow.loadFile(join(__dirname, '../renderer/popup.html'))
+  }
+}
+
+// Create log viewer window
+function createViewerWindow(): void {
+  // If window already exists, focus it
+  if (viewerWindow && !viewerWindow.isDestroyed()) {
+    viewerWindow.focus()
+    return
+  }
+
+  const preloadPath = join(__dirname, '../preload/index.mjs')
+  
+  viewerWindow = new BrowserWindow({
+    width: 900,
+    height: 700,
+    minWidth: 600,
+    minHeight: 400,
+    show: false,
+    titleBarStyle: 'hiddenInset',
+    ...(process.platform === 'linux' ? { icon } : {}),
+    webPreferences: {
+      preload: preloadPath,
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  })
+
+  viewerWindow.on('ready-to-show', () => {
+    viewerWindow?.show()
+  })
+
+  viewerWindow.on('closed', () => {
+    viewerWindow = null
+  })
+
+  // Load the viewer page
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    viewerWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/viewer.html')
+  } else {
+    viewerWindow.loadFile(join(__dirname, '../renderer/viewer.html'))
   }
 }
 
@@ -163,8 +236,15 @@ function updateTrayMenu(): void {
         createPopupWindow()
       }
     },
+    { type: 'separator' },
     {
-      label: '打开日志文件 (Open Log File)',
+      label: '查看日志 (View Logs)',
+      click: () => {
+        createViewerWindow()
+      }
+    },
+    {
+      label: '打开日志文件 (Open File)',
       click: openLogFile
     }
   ]
@@ -235,6 +315,17 @@ app.whenReady().then(() => {
     if (popupWindow && !popupWindow.isDestroyed()) {
       popupWindow.close()
       popupWindow = null
+    }
+  })
+
+  ipcMain.handle('get-logs', async () => {
+    return await readLogEntries()
+  })
+
+  ipcMain.on('close-viewer', () => {
+    if (viewerWindow && !viewerWindow.isDestroyed()) {
+      viewerWindow.close()
+      viewerWindow = null
     }
   })
 

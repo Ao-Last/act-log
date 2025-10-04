@@ -8,6 +8,20 @@ const api = {
   },
   closePopup: () => {
     ipcRenderer.send('close-popup')
+  },
+  getLogs: () => {
+    return ipcRenderer.invoke('get-logs')
+  },
+  onLogsUpdated: (callback: () => void) => {
+    const listener = () => callback()
+    ipcRenderer.on('logs-updated', listener)
+    // Return unsubscribe function
+    return () => {
+      ipcRenderer.removeListener('logs-updated', listener)
+    }
+  },
+  closeViewer: () => {
+    ipcRenderer.send('close-viewer')
   }
 }
 

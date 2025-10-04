@@ -12,13 +12,15 @@ A minimalist desktop application that helps you overcome analysis paralysis and 
 - **💬 强制弹窗** - 周期结束时自动弹出简洁的记录窗口，置顶显示
 - **📝 快速记录** - 单行输入框，支持回车提交，ESC关闭
 - **💾 结构化存储** - 使用JSON Lines (.jsonl)格式，易于解析和迁移
+- **📊 日志查看器** - 美观的时间线界面，支持搜索和实时更新
 - **🎯 系统托盘** - 常驻系统托盘，提供快捷控制菜单
 
 ### 系统托盘菜单 (System Tray Menu)
 
 - **暂停/继续计时** - 暂时停止或恢复定时器
 - **立即记录** - 手动触发记录弹窗（用于测试或即时记录）
-- **打开日志文件** - 使用默认文本编辑器查看所有记录
+- **查看日志** - 打开漂亮的日志查看器界面，浏览所有历史记录
+- **打开日志文件** - 使用默认文本编辑器查看原始 JSON Lines 文件
 - **开发模式: 3秒** - 🔧 仅在开发环境显示，启用后定时器间隔变为3秒，方便快速测试
 - **退出** - 关闭应用
 
@@ -58,6 +60,23 @@ npm run build:linux
 - **构建工具** - Vite + electron-vite
 - **UI样式** - TailwindCSS v4
 - **存储格式** - JSON Lines (.jsonl)
+
+## 📊 日志查看器 (Log Viewer)
+
+### 功能特性
+
+- **🎨 美观界面** - 现代化设计，按日期分组显示
+- **🔍 实时搜索** - 快速过滤查找特定记录
+- **📈 统计信息** - 显示总记录数和累计时间
+- **🔄 实时更新** - 新记录自动刷新显示
+- **📅 时间线视图** - 按日期倒序，最新的在上面
+
+### 使用方法
+
+1. 右键点击系统托盘图标
+2. 选择 **"查看日志 (View Logs)"**
+3. 浏览你的所有活动记录
+4. 使用搜索框快速查找
 
 ## 📁 数据存储 (Data Storage)
 
@@ -106,17 +125,20 @@ const TIMER_INTERVAL = 25 * 60 * 1000 // 25分钟，单位：毫秒
 act-log/
 ├── src/
 │   ├── main/           # 主进程
-│   │   └── index.ts    # 核心逻辑：定时器、托盘、日志
+│   │   └── index.ts    # 核心逻辑：定时器、托盘、日志、窗口管理
 │   ├── preload/        # 预加载脚本
 │   │   ├── index.ts    # IPC通信桥接
 │   │   └── index.d.ts  # TypeScript类型定义
 │   └── renderer/       # 渲染进程
 │       ├── index.html  # 主窗口（未使用）
 │       ├── popup.html  # 弹窗页面
+│       ├── viewer.html # 日志查看器页面
 │       └── src/
 │           ├── popup.tsx           # 弹窗入口
+│           ├── viewer.tsx          # 查看器入口
 │           ├── components/
-│           │   └── Popup.tsx       # 弹窗UI组件
+│           │   ├── Popup.tsx       # 弹窗UI组件
+│           │   └── LogViewer.tsx   # 日志查看器组件
 │           └── assets/
 │               └── popup.css       # TailwindCSS样式
 ├── electron.vite.config.ts  # Vite配置（多页面入口）
@@ -130,6 +152,12 @@ act-log/
 
 - `submit-log` - 提交记录内容
 - `close-popup` - 关闭弹窗
+- `get-logs` - 获取所有日志记录（返回Promise）
+- `close-viewer` - 关闭日志查看器
+
+**主进程 → 渲染进程：**
+
+- `logs-updated` - 通知日志查看器有新记录
 
 ### 关键技术点 (Key Technical Points)
 
@@ -172,6 +200,7 @@ npm run dev
 - ✅ 强制输出，打破思维循环
 - ✅ 简单记录，降低心理负担
 - ✅ 结构化数据，方便后期分析
+- ✅ 美观界面，提升查看体验
 
 ## 📄 License
 
