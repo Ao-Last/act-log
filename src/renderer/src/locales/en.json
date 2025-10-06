@@ -1,0 +1,38 @@
+{
+  "logViewer": {
+    "title": "Activity Log",
+    "totalRecords": "{{count}} records",
+    "timeSpan": "Time span {{span}}",
+    "searchPlaceholder": "Search logs...",
+    "loading": "Loading...",
+    "noRecords": "No records yet",
+    "noMatch": "No matching logs found",
+    "startLogging": "Start logging your activities!",
+    "recordsCount": "{{count}} records",
+    "timeUnits": {
+      "justStarted": "Just started recording",
+      "minutes": "{{count}} minutes",
+      "hours": "{{hours}} hours {{minutes}} minutes",
+      "days": "{{days}} days {{hours}} hours"
+    }
+  },
+  "popup": {
+    "title": "What did you accomplish in the last 25 minutes?",
+    "subtitle": "Record your activities and stay focused",
+    "inputPlaceholder": "Enter your activity log...",
+    "submitButton": "Log It",
+    "cancelButton": "Cancel",
+    "hint": "Press Enter to submit · Press Esc to close"
+  },
+  "settings": {
+    "language": "Language",
+    "selectLanguage": "Select Language"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close"
+  }
+}
+

@@ -1,0 +1,38 @@
+{
+  "logViewer": {
+    "title": "活动日志",
+    "totalRecords": "共 {{count}} 条记录",
+    "timeSpan": "时间跨度 {{span}}",
+    "searchPlaceholder": "搜索日志内容...",
+    "loading": "加载中...",
+    "noRecords": "还没有任何记录",
+    "noMatch": "没有找到匹配的日志",
+    "startLogging": "开始记录你的活动吧！",
+    "recordsCount": "{{count}} 条记录",
+    "timeUnits": {
+      "justStarted": "刚开始记录",
+      "minutes": "{{count}} 分钟",
+      "hours": "{{hours}} 小时 {{minutes}} 分钟",
+      "days": "{{days}} 天 {{hours}} 小时"
+    }
+  },
+  "popup": {
+    "title": "在过去的25分钟里，你做了什么？",
+    "subtitle": "记录你的活动，保持专注",
+    "inputPlaceholder": "输入你的活动记录...",
+    "submitButton": "记录",
+    "cancelButton": "取消",
+    "hint": "按 Enter 提交 · 按 Esc 关闭"
+  },
+  "settings": {
+    "language": "语言",
+    "selectLanguage": "选择语言"
+  },
+  "common": {
+    "ok": "确定",
+    "cancel": "取消",
+    "save": "保存",
+    "close": "关闭"
+  }
+}
+

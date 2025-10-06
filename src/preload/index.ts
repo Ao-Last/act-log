@@ -22,6 +22,34 @@ const api = {
   },
   closeViewer: () => {
     ipcRenderer.send('close-viewer')
+  },
+  getTheme: () => {
+    return ipcRenderer.invoke('get-theme')
+  },
+  getAvailableThemes: () => {
+    return ipcRenderer.invoke('get-available-themes')
+  },
+  onThemeChanged: (callback: (theme: any) => void) => {
+    const listener = (_event: any, theme: any) => callback(theme)
+    ipcRenderer.on('theme-changed', listener)
+    // Return unsubscribe function
+    return () => {
+      ipcRenderer.removeListener('theme-changed', listener)
+    }
+  },
+  getLanguage: () => {
+    return ipcRenderer.invoke('get-language')
+  },
+  setLanguage: (lang: string) => {
+    ipcRenderer.send('set-language', lang)
+  },
+  onLanguageChanged: (callback: (lang: string) => void) => {
+    const listener = (_event: any, lang: string) => callback(lang)
+    ipcRenderer.on('language-changed', listener)
+    // Return unsubscribe function
+    return () => {
+      ipcRenderer.removeListener('language-changed', listener)
+    }
   }
 }
 
