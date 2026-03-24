@@ -6,6 +6,12 @@ Designed to break analysis paralysis and build self-awareness through simple, ho
 
 [中文](./README.md)
 
+<p align="center">
+  <img src="docs/screenshots/log_input.png" width="480" alt="Input popup" />
+  <br/>
+  <img src="docs/screenshots/log_history.png" width="480" alt="Log viewer" />
+</p>
+
 ## How it works
 
 1. Act Log runs quietly in your system tray

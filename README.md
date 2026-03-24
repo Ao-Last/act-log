@@ -6,6 +6,12 @@
 
 [English](./README_EN.md)
 
+<p align="center">
+  <img src="docs/screenshots/log_input.png" width="480" alt="记录弹窗" />
+  <br/>
+  <img src="docs/screenshots/log_history.png" width="480" alt="日志查看器" />
+</p>
+
 ## 怎么用
 
 1. Act Log 安静地运行在系统托盘
