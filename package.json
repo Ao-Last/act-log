@@ -1,6 +1,6 @@
 {
   "name": "act-log",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Activity Logger - Track your actions every 25 minutes",
   "main": "./out/main/index.js",
   "type": "module",
