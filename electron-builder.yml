@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: act-log
+appId: com.actlog.app
+productName: Act Log
 directories:
   buildResources: build
 files:
@@ -9,35 +9,56 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!docs/**'
 asarUnpack:
   - resources/**
-win:
-  executableName: act-log
-nsis:
-  artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
+
+# macOS Configuration
 mac:
-  entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
-dmg:
-  artifactName: ${name}-${version}.${ext}
-linux:
+  # Only build for arm64 (Apple Silicon)
   target:
-    - AppImage
-    - snap
-    - deb
-  maintainer: electronjs.org
-  category: Utility
-appImage:
-  artifactName: ${name}-${version}.${ext}
+    - target: dmg
+      arch: arm64
+    - target: zip
+      arch: arm64
+  
+  # Application icon (will use icon.icns from build folder)
+  icon: build/icon.icns
+  
+  # macOS category
+  category: public.app-category.productivity
+  
+  # Hardened Runtime (required for notarization)
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  
+  # Entitlements for hardened runtime
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  
+  # Notarization: requires env vars APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+  notarize: true
+
+# DMG Configuration
+dmg:
+  artifactName: ${name}-${version}-arm64.${ext}
+  title: ${productName} ${version}
+  icon: build/icon.icns
+  background: null
+  window:
+    width: 540
+    height: 380
+  contents:
+    - x: 144
+      y: 180
+    - x: 396
+      y: 180
+      type: link
+      path: /Applications
+
 npmRebuild: false
+
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: Ao-Last
+  repo: act-log

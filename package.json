@@ -1,11 +1,11 @@
 {
   "name": "act-log",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "Activity Logger - Track your actions every 25 minutes",
   "main": "./out/main/index.js",
   "type": "module",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "Act Log Team",
+  "homepage": "https://github.com/Ao-Last/act-log",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -19,6 +19,7 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
+    "build:mac:arm64": "npm run build && electron-builder --mac --arm64",
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
