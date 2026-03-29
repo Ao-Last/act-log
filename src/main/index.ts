@@ -1,7 +1,8 @@
-import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage, dialog } from 'electron'
 import { join } from 'path'
 import { promises as fs } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { autoUpdater } from 'electron-updater'
 import { createCanvas } from 'canvas'
 import Store from 'electron-store'
 import icon from '../../resources/icon.png?asset'
@@ -77,13 +78,23 @@ const TRANSLATIONS = {
     logNow: 'Log Now',
     viewLogs: 'View Logs',
     openFile: 'Open Log File',
+    checkUpdate: 'Check for Updates',
     theme: 'Theme',
     language: 'Language',
     devMode: 'Dev Mode: 3s',
     quit: 'Quit',
     languageAuto: 'Auto (System)',
     languageChinese: '中文',
-    languageEnglish: 'English'
+    languageEnglish: 'English',
+    updateAvailable: 'Update Available',
+    updateAvailableMsg: 'A new version ({version}) is available. Download now?',
+    updateNotAvailable: 'You\'re up to date!',
+    updateDownloaded: 'Update Ready',
+    updateDownloadedMsg: 'A new version has been downloaded. Restart to apply?',
+    updateError: 'Update check failed',
+    restart: 'Restart',
+    download: 'Download',
+    later: 'Later'
   },
   zh: {
     pauseTimer: '暂停计时',
@@ -91,13 +102,23 @@ const TRANSLATIONS = {
     logNow: '立即记录',
     viewLogs: '查看日志',
     openFile: '打开日志文件',
+    checkUpdate: '检查更新',
     theme: '主题',
     language: '语言',
     devMode: '开发模式: 3秒',
     quit: '退出',
     languageAuto: '自动（跟随系统）',
     languageChinese: '中文',
-    languageEnglish: 'English'
+    languageEnglish: 'English',
+    updateAvailable: '发现新版本',
+    updateAvailableMsg: '新版本 ({version}) 已发布，是否下载？',
+    updateNotAvailable: '已是最新版本！',
+    updateDownloaded: '更新就绪',
+    updateDownloadedMsg: '新版本已下载完成，是否立即重启？',
+    updateError: '检查更新失败',
+    restart: '重启',
+    download: '下载',
+    later: '稍后'
   }
 }
 
@@ -531,6 +552,10 @@ function updateTrayMenu(): void {
       label: t('openFile'),
       click: openLogFile
     },
+    {
+      label: t('checkUpdate'),
+      click: () => checkForUpdates(true)
+    },
     { type: 'separator' },
     {
       label: t('language'),
@@ -615,6 +640,65 @@ function createTray(): void {
   }
 }
 
+// Auto-updater setup
+function setupAutoUpdater(): void {
+  autoUpdater.autoDownload = false
+  autoUpdater.autoInstallOnAppQuit = true
+
+  autoUpdater.on('update-available', (info) => {
+    const msg = t('updateAvailableMsg').replace('{version}', info.version)
+    dialog
+      .showMessageBox({
+        type: 'info',
+        title: t('updateAvailable'),
+        message: msg,
+        buttons: [t('download'), t('later')]
+      })
+      .then(({ response }) => {
+        if (response === 0) {
+          autoUpdater.downloadUpdate()
+        }
+      })
+  })
+
+  autoUpdater.on('update-not-available', () => {
+    // Only show dialog when manually checking
+    if (manualUpdateCheck) {
+      dialog.showMessageBox({ type: 'info', message: t('updateNotAvailable') })
+      manualUpdateCheck = false
+    }
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    dialog
+      .showMessageBox({
+        type: 'info',
+        title: t('updateDownloaded'),
+        message: t('updateDownloadedMsg'),
+        buttons: [t('restart'), t('later')]
+      })
+      .then(({ response }) => {
+        if (response === 0) {
+          autoUpdater.quitAndInstall()
+        }
+      })
+  })
+
+  autoUpdater.on('error', () => {
+    if (manualUpdateCheck) {
+      dialog.showMessageBox({ type: 'error', message: t('updateError') })
+      manualUpdateCheck = false
+    }
+  })
+}
+
+let manualUpdateCheck = false
+
+function checkForUpdates(manual = false): void {
+  manualUpdateCheck = manual
+  autoUpdater.checkForUpdates()
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(() => {
@@ -629,6 +713,12 @@ app.whenReady().then(() => {
 
   // Start the timer
   startTimer()
+
+  // Setup auto-updater (skip in dev)
+  if (!is.dev) {
+    setupAutoUpdater()
+    checkForUpdates()
+  }
 
   // IPC handlers
   ipcMain.on('submit-log', async (_event, action: string) => {
